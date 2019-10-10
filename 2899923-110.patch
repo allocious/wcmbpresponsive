@@ -1,0 +1,412 @@
+diff --git a/core/modules/forum/config/optional/core.entity_form_display.taxonomy_term.forums.default.yml b/core/modules/forum/config/optional/core.entity_form_display.taxonomy_term.forums.default.yml
+index 50df98a..51fa069 100644
+--- a/core/modules/forum/config/optional/core.entity_form_display.taxonomy_term.forums.default.yml
++++ b/core/modules/forum/config/optional/core.entity_form_display.taxonomy_term.forums.default.yml
+@@ -25,5 +25,12 @@ content:
+       size: 60
+       placeholder: ''
+     third_party_settings: {  }
++  status:
++    type: boolean_checkbox
++    settings:
++      display_label: true
++    weight: 100
++    region: content
++    third_party_settings: {  }
+ hidden:
+   forum_container: true
+diff --git a/core/modules/migrate/tests/src/Kernel/MigrateBundleTest.php b/core/modules/migrate/tests/src/Kernel/MigrateBundleTest.php
+index b6c3051..977b55d 100644
+--- a/core/modules/migrate/tests/src/Kernel/MigrateBundleTest.php
++++ b/core/modules/migrate/tests/src/Kernel/MigrateBundleTest.php
+@@ -18,7 +18,7 @@ class MigrateBundleTest extends MigrateTestBase {
+    *
+    * @var array
+    */
+-  public static $modules = ['taxonomy', 'text', 'user'];
++  public static $modules = ['taxonomy', 'text', 'user', 'system'];
+ 
+   /**
+    * {@inheritdoc}
+diff --git a/core/modules/migrate/tests/src/Kernel/MigrateRollbackEntityConfigTest.php b/core/modules/migrate/tests/src/Kernel/MigrateRollbackEntityConfigTest.php
+index d43ad8a..04342ae 100644
+--- a/core/modules/migrate/tests/src/Kernel/MigrateRollbackEntityConfigTest.php
++++ b/core/modules/migrate/tests/src/Kernel/MigrateRollbackEntityConfigTest.php
+@@ -17,7 +17,7 @@ class MigrateRollbackEntityConfigTest extends MigrateTestBase {
+    *
+    * @var array
+    */
+-  public static $modules = ['field', 'taxonomy', 'text', 'language', 'config_translation', 'user'];
++  public static $modules = ['field', 'taxonomy', 'text', 'language', 'config_translation', 'user', 'system'];
+ 
+   /**
+    * {@inheritdoc}
+diff --git a/core/modules/migrate/tests/src/Kernel/MigrateRollbackTest.php b/core/modules/migrate/tests/src/Kernel/MigrateRollbackTest.php
+index de1666b..9d517b1 100644
+--- a/core/modules/migrate/tests/src/Kernel/MigrateRollbackTest.php
++++ b/core/modules/migrate/tests/src/Kernel/MigrateRollbackTest.php
+@@ -20,7 +20,7 @@ class MigrateRollbackTest extends MigrateTestBase {
+    *
+    * @var array
+    */
+-  public static $modules = ['field', 'taxonomy', 'text', 'user'];
++  public static $modules = ['field', 'taxonomy', 'text', 'user', 'system'];
+ 
+   /**
+    * {@inheritdoc}
+diff --git a/core/modules/migrate_drupal_ui/tests/src/Functional/d6/Upgrade6Test.php b/core/modules/migrate_drupal_ui/tests/src/Functional/d6/Upgrade6Test.php
+index b6a7e80..5a12f45 100644
+--- a/core/modules/migrate_drupal_ui/tests/src/Functional/d6/Upgrade6Test.php
++++ b/core/modules/migrate_drupal_ui/tests/src/Functional/d6/Upgrade6Test.php
+@@ -82,7 +82,7 @@ protected function getEntityCounts() {
+       'search_page' => 2,
+       'shortcut' => 2,
+       'shortcut_set' => 1,
+-      'action' => 23,
++      'action' => 25,
+       'menu' => 8,
+       'taxonomy_term' => 15,
+       'taxonomy_vocabulary' => 7,
+diff --git a/core/modules/migrate_drupal_ui/tests/src/Functional/d7/Upgrade7Test.php b/core/modules/migrate_drupal_ui/tests/src/Functional/d7/Upgrade7Test.php
+index d13f04d..d82ceac 100644
+--- a/core/modules/migrate_drupal_ui/tests/src/Functional/d7/Upgrade7Test.php
++++ b/core/modules/migrate_drupal_ui/tests/src/Functional/d7/Upgrade7Test.php
+@@ -84,7 +84,7 @@ protected function getEntityCounts() {
+       'search_page' => 2,
+       'shortcut' => 6,
+       'shortcut_set' => 2,
+-      'action' => 17,
++      'action' => 19,
+       'menu' => 6,
+       'taxonomy_term' => 24,
+       'taxonomy_vocabulary' => 7,
+diff --git a/core/modules/taxonomy/config/install/system.action.taxonomy_term_publish_action.yml b/core/modules/taxonomy/config/install/system.action.taxonomy_term_publish_action.yml
+new file mode 100644
+index 0000000..4bcdd99
+--- /dev/null
++++ b/core/modules/taxonomy/config/install/system.action.taxonomy_term_publish_action.yml
+@@ -0,0 +1,10 @@
++langcode: en
++status: true
++dependencies:
++  module:
++    - taxonomy
++id: taxonomy_term_publish_action
++label: 'Publish taxonomy term'
++type: taxonomy_term
++plugin: entity:publish_action:taxonomy_term
++configuration: {  }
+diff --git a/core/modules/taxonomy/config/install/system.action.taxonomy_term_unpublish_action.yml b/core/modules/taxonomy/config/install/system.action.taxonomy_term_unpublish_action.yml
+new file mode 100644
+index 0000000..a0d8bf3
+--- /dev/null
++++ b/core/modules/taxonomy/config/install/system.action.taxonomy_term_unpublish_action.yml
+@@ -0,0 +1,10 @@
++langcode: en
++status: true
++dependencies:
++  module:
++    - taxonomy
++id: taxonomy_term_unpublish_action
++label: 'Unpublish taxonomy term'
++type: taxonomy_term
++plugin: entity:unpublish_action:taxonomy_term
++configuration: {  }
+diff --git a/core/modules/taxonomy/src/Entity/Term.php b/core/modules/taxonomy/src/Entity/Term.php
+index 949518a..270f9b7 100644
+--- a/core/modules/taxonomy/src/Entity/Term.php
++++ b/core/modules/taxonomy/src/Entity/Term.php
+@@ -135,6 +135,16 @@ public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+ 
+     $fields['uuid']->setDescription(t('The term UUID.'));
+ 
++    $fields['status']
++      ->setDisplayOptions('form', [
++        'type' => 'boolean_checkbox',
++        'settings' => [
++          'display_label' => TRUE,
++        ],
++        'weight' => 100,
++      ])
++      ->setDisplayConfigurable('form', TRUE);
++
+     $fields['vid']->setLabel(t('Vocabulary'))
+       ->setDescription(t('The vocabulary to which the term is assigned.'));
+ 
+diff --git a/core/modules/taxonomy/src/TermTranslationHandler.php b/core/modules/taxonomy/src/TermTranslationHandler.php
+index 7108232..8ef804b 100644
+--- a/core/modules/taxonomy/src/TermTranslationHandler.php
++++ b/core/modules/taxonomy/src/TermTranslationHandler.php
+@@ -16,6 +16,9 @@ class TermTranslationHandler extends ContentTranslationHandler {
+    */
+   public function entityFormAlter(array &$form, FormStateInterface $form_state, EntityInterface $entity) {
+     parent::entityFormAlter($form, $form_state, $entity);
++
++    $form['content_translation']['status']['#access'] = !isset($form['content_translation']);
++
+     $form['actions']['submit']['#submit'][] = [$this, 'entityFormSave'];
+   }
+ 
+@@ -36,4 +39,15 @@ public function entityFormSave(array $form, FormStateInterface $form_state) {
+     }
+   }
+ 
++  /**
++   * {@inheritdoc}
++   */
++  public function entityFormEntityBuild($entity_type, EntityInterface $entity, array $form, FormStateInterface $form_state) {
++    if ($form_state->hasValue('content_translation')) {
++      $translation = &$form_state->getValue('content_translation');
++      $translation['status'] = $entity->isPublished();
++    }
++    parent::entityFormEntityBuild($entity_type, $entity, $form, $form_state);
++  }
++
+ }
+diff --git a/core/modules/taxonomy/taxonomy.module b/core/modules/taxonomy/taxonomy.module
+index 4ba6d19..a40a909 100644
+--- a/core/modules/taxonomy/taxonomy.module
++++ b/core/modules/taxonomy/taxonomy.module
+@@ -84,9 +84,9 @@ function taxonomy_help($route_name, RouteMatchInterface $route_match) {
+  * Implements hook_entity_type_alter().
+  */
+ function taxonomy_entity_type_alter(array &$entity_types) {
+-  // @todo Moderation is disabled for taxonomy terms until when we have an UI
+-  //   for them.
+-  //   @see https://www.drupal.org/project/drupal/issues/2899923
++  // @todo Moderation is disabled for taxonomy terms until integration is
++  //   enabled for them.
++  //   @see https://www.drupal.org/project/drupal/issues/3047110
+   $entity_types['taxonomy_term']->setHandlerClass('moderation', '');
+ }
+ 
+diff --git a/core/modules/taxonomy/taxonomy.post_update.php b/core/modules/taxonomy/taxonomy.post_update.php
+index 69fbb3d..5b98cce 100644
+--- a/core/modules/taxonomy/taxonomy.post_update.php
++++ b/core/modules/taxonomy/taxonomy.post_update.php
+@@ -6,6 +6,7 @@
+  */
+ 
+ use Drupal\Core\Config\Entity\ConfigEntityUpdater;
++use Drupal\Core\Entity\Display\EntityDisplayInterface;
+ use Drupal\Core\Field\BaseFieldDefinition;
+ use Drupal\Core\StringTranslation\TranslatableMarkup;
+ use Drupal\views\ViewExecutable;
+@@ -227,3 +228,23 @@ function taxonomy_post_update_make_taxonomy_term_revisionable(&$sandbox) {
+ 
+   return t('Taxonomy terms have been converted to be revisionable.');
+ }
++
++/**
++ * Add status with settings to all form displays for taxonomy entities.
++ */
++function taxonomy_post_update_configure_status_field_widget(&$sandbox = NULL) {
++  \Drupal::classResolver(ConfigEntityUpdater::class)->update($sandbox, 'entity_form_display', function (EntityDisplayInterface $entity_form_display) {
++    // Only update taxonomy term entity form displays with no existing options
++    // for the status field.
++    if ($entity_form_display->getTargetEntityTypeId() == 'taxonomy_term' && empty($entity_form_display->getComponent('status'))) {
++      $entity_form_display->setComponent('status', [
++        'type' => 'boolean_checkbox',
++        'settings' => [
++          'display_label' => TRUE,
++        ],
++      ]);
++      return TRUE;
++    };
++    return FALSE;
++  });
++}
+diff --git a/core/modules/taxonomy/tests/fixtures/update/core.entity_form_display.taxonomy_term.tags.default.yml b/core/modules/taxonomy/tests/fixtures/update/core.entity_form_display.taxonomy_term.tags.default.yml
+new file mode 100644
+index 0000000..7835d22
+--- /dev/null
++++ b/core/modules/taxonomy/tests/fixtures/update/core.entity_form_display.taxonomy_term.tags.default.yml
+@@ -0,0 +1,43 @@
++langcode: en
++status: true
++dependencies:
++  config:
++    - taxonomy.vocabulary.tags
++  module:
++    - path
++    - text
++id: taxonomy_term.tags.default
++targetEntityType: taxonomy_term
++bundle: tags
++mode: default
++content:
++  description:
++    type: text_textarea
++    weight: 0
++    region: content
++    settings:
++      placeholder: ''
++      rows: 5
++    third_party_settings: {  }
++  name:
++    type: string_textfield
++    weight: -5
++    region: content
++    settings:
++      size: 60
++      placeholder: ''
++    third_party_settings: {  }
++  path:
++    type: path
++    weight: 30
++    region: content
++    settings: {  }
++    third_party_settings: {  }
++  status:
++    type: boolean_checkbox
++    settings:
++      display_label: false
++    weight: 100
++    region: content
++    third_party_settings: {  }
++hidden: {  }
+diff --git a/core/modules/taxonomy/tests/fixtures/update/drupal-8.taxonomy-term-publishing-status-ui-2899923.php b/core/modules/taxonomy/tests/fixtures/update/drupal-8.taxonomy-term-publishing-status-ui-2899923.php
+new file mode 100644
+index 0000000..f665fb1
+--- /dev/null
++++ b/core/modules/taxonomy/tests/fixtures/update/drupal-8.taxonomy-term-publishing-status-ui-2899923.php
+@@ -0,0 +1,24 @@
++<?php
++
++/**
++ * @file
++ * Contains database additions to drupal-8.filled.standard.php.gz for testing
++ * the upgrade path of https://www.drupal.org/project/drupal/issues/2899923.
++ */
++
++use Drupal\Core\Database\Database;
++use Drupal\Core\Serialization\Yaml;
++
++$connection = Database::getConnection();
++
++$taxonomy_form_display_file = __DIR__ . '/core.entity_form_display.taxonomy_term.tags.default.yml';
++$taxonomy_form_display_config = Yaml::decode(file_get_contents($taxonomy_form_display_file));
++
++$connection->insert('config')
++  ->fields(['collection', 'name', 'data'])
++  ->values([
++    'collection' => '',
++    'name' => 'core.entity_form_display.taxonomy_term.tags.default',
++    'data' => serialize($taxonomy_form_display_config),
++  ])
++  ->execute();
+diff --git a/core/modules/taxonomy/tests/src/Functional/TermTranslationUITest.php b/core/modules/taxonomy/tests/src/Functional/TermTranslationUITest.php
+index b51b20a..509a703 100644
+--- a/core/modules/taxonomy/tests/src/Functional/TermTranslationUITest.php
++++ b/core/modules/taxonomy/tests/src/Functional/TermTranslationUITest.php
+@@ -161,4 +161,39 @@ protected function doTestTranslationEdit() {
+     }
+   }
+ 
++  /**
++   * {@inheritdoc}
++   */
++  protected function doTestPublishedStatus() {
++    $storage = $this->container->get('entity_type.manager')
++      ->getStorage($this->entityTypeId);
++    $storage->resetCache([$this->entityId]);
++    $entity = $storage->load($this->entityId);
++    $languages = $this->container->get('language_manager')->getLanguages();
++
++    $statuses = [
++      TRUE,
++      FALSE,
++    ];
++
++    foreach ($statuses as $index => $value) {
++      // (Un)publish the term translations and check that the translation
++      // statuses are (un)published accordingly.
++      foreach ($this->langcodes as $langcode) {
++        $options = ['language' => $languages[$langcode]];
++        $url = $entity->toUrl('edit-form', $options);
++        $this->drupalPostForm($url, ['status[value]' => $value], t('Save'), $options);
++      }
++      $storage->resetCache([$this->entityId]);
++      $entity = $storage->load($this->entityId);
++      foreach ($this->langcodes as $langcode) {
++        // The term is created as unpublished thus we switch to the published
++        // status first.
++        $status = !$index;
++        $translation = $entity->getTranslation($langcode);
++        $this->assertEquals($status, $this->manager->getTranslationMetadata($translation)->isPublished(), 'The translation has been correctly unpublished.');
++      }
++    }
++  }
++
+ }
+diff --git a/core/modules/taxonomy/tests/src/Functional/Update/TaxonomyTermUpdatePathTest.php b/core/modules/taxonomy/tests/src/Functional/Update/TaxonomyTermUpdatePathTest.php
+index 45e7e56..7a1dd35 100644
+--- a/core/modules/taxonomy/tests/src/Functional/Update/TaxonomyTermUpdatePathTest.php
++++ b/core/modules/taxonomy/tests/src/Functional/Update/TaxonomyTermUpdatePathTest.php
+@@ -2,6 +2,7 @@
+ 
+ namespace Drupal\Tests\taxonomy\Functional\Update;
+ 
++use Drupal\Core\Entity\Entity\EntityFormDisplay;
+ use Drupal\FunctionalTests\Update\UpdatePathTestBase;
+ use Drupal\user\Entity\User;
+ use Drupal\views\Entity\View;
+@@ -22,6 +23,7 @@ protected function setDatabaseDumpFiles() {
+     $this->databaseDumpFiles = [
+       __DIR__ . '/../../../../../system/tests/fixtures/update/drupal-8.filled.standard.php.gz',
+       __DIR__ . '/../../../fixtures/update/drupal-8.views-taxonomy-term-publishing-status-2981887.php',
++      __DIR__ . '/../../../fixtures/update/drupal-8.taxonomy-term-publishing-status-ui-2899923.php',
+     ];
+   }
+ 
+@@ -197,4 +199,50 @@ protected function replaceUser1() {
+     // Do not replace the user from our dump.
+   }
+ 
++  /**
++   * Tests that the taxonomy_term entity form has the status checkbox.
++   *
++   * @see taxonomy_post_update_configure_status_field_widget()
++   */
++  public function testStatusCheckbox() {
++    $ids = \Drupal::entityQuery('entity_form_display')
++      ->condition('targetEntityType', 'taxonomy_term')
++      ->execute();
++
++    // Make sure we have the expected values before the update.
++    $config_keys = [];
++    foreach ($ids as $id) {
++      $config_keys[] = 'core.entity_form_display.' . $id;
++    }
++    /* @var \Drupal\Core\Config\ImmutableConfig[] $form_display_configs */
++    $form_display_configs = $this->container->get('config.factory')->loadMultiple($config_keys);
++    foreach ($form_display_configs as $config) {
++      $status_config = $config->get('content.status');
++      if ($config->getName() == 'core.entity_form_display.taxonomy_term.tags.default') {
++        $this->assertNotNull($status_config);
++        $this->assertEquals(['display_label' => FALSE], $status_config['settings']);
++      }
++      else {
++        $this->assertNull($status_config);
++      }
++    }
++
++    // Run updates.
++    $this->runUpdates();
++
++    /* @var \Drupal\Core\Entity\Display\EntityDisplayInterface[] $form_displays */
++    $form_displays = EntityFormDisplay::loadMultiple($ids);
++    foreach ($form_displays as $form_display) {
++      $component = $form_display->getComponent('status');
++      if ($form_display->id() == 'taxonomy_term.tags.default') {
++        // Display label should not have been set to TRUE by the upgrade path.
++        $this->assertEquals(['display_label' => FALSE], $component['settings']);
++      }
++      else {
++        $this->assertEquals('boolean_checkbox', $component['type']);
++        $this->assertEquals(['display_label' => TRUE], $component['settings']);
++      }
++    }
++  }
++
+ }

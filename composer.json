@@ -1,0 +1,144 @@
+{
+    "name": "drupal-composer/drupal-project",
+    "description": "Project template for Drupal 8 projects with composer",
+    "type": "project",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "",
+            "role": ""
+        }
+    ],
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        }
+    ],
+    "require": {
+        "php": ">=5.6",
+        "composer/installers": "^1.2",
+        "cweagans/composer-patches": "^1.6.5",
+        "drupal-composer/drupal-scaffold": "^2.5",
+        "drupal/admin_toolbar": "^1.27",
+        "drupal/backup_migrate": "^4.0",
+        "drupal/better_exposed_filters": "^3.0@alpha",
+        "drupal/block_class": "^1.0",
+        "drupal/bootstrap": "^3.20",
+        "drupal/bootstrap_layouts": "^5.1",
+        "drupal/business_rules": "^1.0@beta",
+        "drupal/ckeditor_accordion": "^1.2",
+        "drupal/ckeditor_bootstrap_grid": "^1.2",
+        "drupal/colorbox": "^1.4",
+        "drupal/colorbox_load": "^1.0@RC",
+        "drupal/condition_query": "^1.2",
+        "drupal/console": "^1.0.2",
+        "drupal/context_breadcrumb": "^1.0@beta",
+        "drupal/core": "^8.7.0",
+        "drupal/ctools": "^3.2",
+        "drupal/dbug": "^1.0",
+        "drupal/devel": "^2.1",
+        "drupal/ds": "^3.3",
+        "drupal/easy_breadcrumb": "^1.12",
+        "drupal/editor_advanced_link": "^1.4",
+        "drupal/editor_file": "^1.4",
+        "drupal/external_link_popup": "^1.2",
+        "drupal/extlink": "^1.1",
+        "drupal/faq": "^1.0@alpha",
+        "drupal/faqfield": "^1.1",
+        "drupal/field_group": "^1.0",
+        "drupal/globallink": "^2.0",
+        "drupal/jcarousel": "^4.0",
+        "drupal/jw_player": "^1.0@beta",
+        "drupal/marquee": "^1.0@beta",
+        "drupal/menu_per_role": "^1.0",
+        "drupal/owlcarousel": "^1.0@alpha",
+        "drupal/page_manager": "^4.0@beta",
+        "drupal/panelizer": "^4.1",
+        "drupal/panels": "^4.4",
+        "drupal/panels_bootstrap_layouts": "3.x-dev",
+        "drupal/panels_extra_styles_d8": "1.x-dev",
+        "drupal/paragraphs": "^1.9",
+        "drupal/pathauto": "^1.4",
+        "drupal/redirect": "^1.4",
+        "drupal/responsive_slideshow": "^1.2",
+        "drupal/route_specific_breadcrumb": "^1.0",
+        "drupal/rules": "^3.0@alpha",
+        "drupal/scheduler": "^1.0",
+        "drupal/token": "^1.5",
+        "drupal/token_custom": "^1.0@alpha",
+        "drupal/token_filter": "^1.1",
+        "drupal/twig_tweak": "^2.4",
+        "drupal/video_embed_jwplayer": "^1.0@RC",
+        "drupal/video_js": "^1.0@beta",
+        "drupal/videojs": "^1.0",
+        "drupal/views_custom_link": "^1.0",
+        "drupal/views_field_view": "^1.0@beta",
+        "drupal/views_row_insert": "^1.2",
+        "drush/drush": "^9.0.0",
+        "vlucas/phpdotenv": "^2.4",
+        "webflo/drupal-finder": "^1.0.0",
+        "webmozart/path-util": "^2.3",
+        "zaporylie/composer-drupal-optimizations": "^1.0"
+    },
+    "require-dev": {
+        "webflo/drupal-core-require-dev": "^8.7.0"
+    },
+    "conflict": {
+        "drupal/drupal": "*"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "sort-packages": true
+    },
+    "autoload": {
+        "classmap": [
+            "scripts/composer/ScriptHandler.php"
+        ],
+        "files": ["load.environment.php"]
+    },
+    "scripts": {
+        "pre-install-cmd": [
+            "DrupalProject\\composer\\ScriptHandler::checkComposerVersion"
+        ],
+        "pre-update-cmd": [
+            "DrupalProject\\composer\\ScriptHandler::checkComposerVersion"
+        ],
+        "post-install-cmd": [
+            "DrupalProject\\composer\\ScriptHandler::createRequiredFiles"
+        ],
+        "post-update-cmd": [
+            "DrupalProject\\composer\\ScriptHandler::createRequiredFiles"
+        ]
+    },
+    "extra": {
+        "composer-exit-on-patch-failure": true,
+        "patchLevel": {
+            "drupal/core": "-p2"
+        },
+        "installer-paths": {
+            "web/core": ["type:drupal-core"],
+            "web/libraries/{$name}": ["type:drupal-library"],
+            "web/modules/contrib/{$name}": ["type:drupal-module"],
+            "web/profiles/contrib/{$name}": ["type:drupal-profile"],
+            "web/themes/contrib/{$name}": ["type:drupal-theme"],
+            "drush/Commands/{$name}": ["type:drupal-drush"]
+        },
+        "drupal-scaffold": {
+            "initial": {
+                ".editorconfig": "../.editorconfig",
+                ".gitattributes": "../.gitattributes"
+            }
+        },
+        "patches": {
+          "drupal/panels": {
+            "2849867: Custom attributes in panels blocks and variants": "https://www.drupal.org/files/issues/2018-10-20/panels_custom_attributes_in_panels_blocks-2849867-46.patch"
+          },
+					"drupal/core": {
+            "2899923: UI for publishing/unpublishing taxonomy terms": "https://www.drupal.org/files/issues/2019-05-13/2899923-110.patch",
+            "2862828: Boolean field filtering does not work when no values are set": "https://www.drupal.org/files/issues/2019-09-02/boolean-no-value-2862828-23.patch"
+          }
+        }
+    }
+}
